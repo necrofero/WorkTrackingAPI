@@ -1,0 +1,14 @@
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.csprojAssemblyReference.cache
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.csproj.CoreCompileInputs.cache
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.RazorAssemblyInfo.cache
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.RazorAssemblyInfo.cs
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.AssemblyInfoInputs.cache
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.AssemblyInfo.cs
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/bin/Debug/netcoreapp2.1/WorkTrackingAPI.dll
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/bin/Debug/netcoreapp2.1/WorkTrackingAPI.pdb
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.RazorTargetAssemblyInfo.cache
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.dll
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/obj/Debug/netcoreapp2.1/WorkTrackingAPI.pdb
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/bin/Debug/netcoreapp2.1/WorkTrackingAPI.deps.json
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/bin/Debug/netcoreapp2.1/WorkTrackingAPI.runtimeconfig.json
+/Users/oscarpiquerassegura/Documents/Prácticas MIA/WorkTrackingAPI/bin/Debug/netcoreapp2.1/WorkTrackingAPI.runtimeconfig.dev.json
