@@ -11,12 +11,22 @@ namespace WorkTrackingAPI.Managers
     public static class RecordManager
     {
 
-        public static List<WorkRecord> GetRecords(string start, string end)
+        public static List<WorkRecord> GetRecords(string start, string end, string employee)
         {
             var result = new List<WorkRecord>();
-            var filter = new BsonDocument {
-            };
-            List<BsonDocument> documents = MongoHelper.GetDatabase().GetCollection<BsonDocument>("work_records").Find(filter).ToList();
+            var start_splitted = start.Split('_');
+            var end_splitted = end.Split('_');
+            var filterBuilder = Builders<BsonDocument>.Filter;
+            var filter = filterBuilder.Gte("date_time", new DateTime(int.Parse(start_splitted[2]), int.Parse(start_splitted[1]), int.Parse(start_splitted[0]), 0, 0, 0)) &
+                         filterBuilder.Lte("date_time", new DateTime(int.Parse(end_splitted[2]), int.Parse(end_splitted[1]), int.Parse(end_splitted[0]), 23, 59, 59));
+            if (employee != "_")
+            {
+                filter = filter & filterBuilder.Eq("employee_id", employee);
+            }
+            var sortBuilder = Builders<BsonDocument>.Sort;
+            var sort = sortBuilder.Ascending("date_time").Descending("employee_name");
+
+            List<BsonDocument> documents = MongoHelper.GetDatabase().GetCollection<BsonDocument>("work_records").Find(filter).Sort(sort).ToList();
             foreach (var document in documents)
             {
                 var record = new WorkRecord();
@@ -30,6 +40,28 @@ namespace WorkTrackingAPI.Managers
                 result.Add(record);
             }
             return result;
+        }
+
+        public static WorkRecord InsertRecord(WorkRecord record)
+        {
+            BsonDocument newRecord = new BsonDocument();
+            newRecord.Add("employee_id", record.EmployeeId);
+            newRecord.Add("employee_name", record.EmployeeName);
+            newRecord.Add("date_time", record.DateTime);
+            newRecord.Add("type", record.Type);
+            newRecord.Add("week", record.Week);
+            newRecord.Add("Synced", record.Synced);
+            MongoHelper.GetDatabase().GetCollection<BsonDocument>("work_records").InsertOne(newRecord);
+            record.Id = newRecord.GetValue("_id").ToString();
+            return record;
+        }
+
+        public static void DeleteRecord(string recordId)
+        {
+            var filter = new BsonDocument {
+                {"_id", ObjectId.Parse(recordId)}
+            };
+            MongoHelper.GetDatabase().GetCollection<BsonDocument>("work_records").DeleteOne(filter);
         }
 
     }

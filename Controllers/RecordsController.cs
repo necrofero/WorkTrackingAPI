@@ -14,12 +14,27 @@ namespace WorkTrackingAPI.Controllers
     public class RecordController : ControllerBase
     {
 
-        // GET api/record/6_6_2016/7_7_2017
-        [HttpGet("{start}/{end}")]
-        public JsonResult Get(string start, string end)
+        // GET api/record/6_6_2016/7_7_2017/456
+        [HttpGet("{start}/{end}/{employee}")]
+        public JsonResult Get(string start, string end, string employee)
         {
-            var result = RecordManager.GetRecords(start, end);
+            var result = RecordManager.GetRecords(start, end, employee);
             return new JsonResult(result);
+        }
+
+        // POST api/record
+        [HttpPost()]
+        public JsonResult Post([FromBody] WorkRecord record)
+        {
+            var result = RecordManager.InsertRecord(record);
+            return new JsonResult(result);
+        }
+
+        // DELETE api/record/5
+        [HttpDelete("{recordId}")]
+        public void Delete(string recordId)
+        {
+            RecordManager.DeleteRecord(recordId);
         }
 
     }
