@@ -1,9 +1,21 @@
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WorkTrackingAPI.Helpers;
 using WorkTrackingAPI.Models;
+using Nethereum.Web3;
+using Nethereum.Web3.Accounts;
+using Nethereum.Web3.Accounts.Managed;
+using Nethereum.Hex.HexTypes;
+using Nethereum.RPC.Eth.DTOs;
+using Nethereum.Util;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+
 
 namespace WorkTrackingAPI.Managers
 {
@@ -62,6 +74,99 @@ namespace WorkTrackingAPI.Managers
                 {"_id", ObjectId.Parse(recordId)}
             };
             MongoHelper.GetDatabase().GetCollection<BsonDocument>("work_records").DeleteOne(filter);
+        }
+
+        public static SyncedData GetSyncedData(int year, int week, string employee)
+        {
+            var result = new SyncedData();
+            var filter = new BsonDocument {
+                { "year", year },
+                { "week", week },
+                { "employee", employee }
+            };
+            List<BsonDocument> documents = MongoHelper.GetDatabase().GetCollection<BsonDocument>("synced_data").Find(filter).ToList();
+            if (documents.Count > 0)
+            {
+                result.Id = documents[0].GetValue("_id", "").ToString();
+                result.Year = documents[0].GetValue("year", 0).ToInt32();
+                result.Week = documents[0].GetValue("week", 0).ToInt32();
+                result.Employee = documents[0].GetValue("employee", "").ToString();
+                result.Tx = documents[0].GetValue("tx", "").ToString();
+            }
+            return result;
+        }
+
+        public static async Task<SyncedData> SetSyncedDataAsync(int year, int week, string employee)
+        {
+            DateTime dayInWeek = new DateTime(year, 1, 1);
+            dayInWeek = dayInWeek.AddDays((week - 1) * 7);
+            while (dayInWeek.DayOfWeek != DayOfWeek.Monday)
+            {
+                dayInWeek = dayInWeek.AddDays(-1);
+            }
+            DateTime startDate = dayInWeek.Date;
+            DateTime endDate = startDate.AddDays(6);
+            var start = startDate.Day + "_" + startDate.Month + "_" + startDate.Year;
+            var end = endDate.Day + "_" + endDate.Month + "_" + endDate.Year;
+
+            var records = RecordManager.GetRecords(start, end, employee);
+
+            var hash = "";
+            var csv = "Fecha,Hora,Tipo,Empleado";
+            foreach (var record in records)
+            {
+                var csv_line = new List<string>();
+                record.DateTime = record.DateTime.AddHours(2);
+                csv_line.Add(record.DateTime.Day + "/" + record.DateTime.Month + "/" + record.DateTime.Year);
+                csv_line.Add(record.DateTime.Hour + ":" + record.DateTime.Minute);
+                csv_line.Add(record.Type == "entrance" ? "Entrada" : "Salida");
+                csv_line.Add(record.EmployeeName);
+                csv = csv + "\n" + String.Join(',', csv_line);
+            }
+            using (var sha256 = SHA256.Create())
+            {
+                Byte[] hashedCsv = sha256.ComputeHash(Encoding.UTF8.GetBytes(csv));
+                StringBuilder sb = new StringBuilder();
+                foreach (Byte b in hashedCsv)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                hash = sb.ToString();
+            }
+
+            var tx = "";
+            var web3 = new Web3("https://ropsten.infura.io/v3/7b9974f32d58401f917c63242e1dcb48");
+            var account = new Account("9817CF212721DDAB1087FF642C7D52DCC1DDC0CBE1ABB92A085C12EE92365673");
+            try
+            {
+                //var balance = await web3.Eth.GetBalance.SendRequestAsync("0xF510450c7731B584E58635D361Fd33570dD92A98");
+                //var etherAmount = Web3.Convert.FromWei(balance.Value);
+                var txCount = await web3.Eth.Transactions.GetTransactionCount.SendRequestAsync("0xF510450c7731B584E58635D361Fd33570dD92A98");
+                var encoded = Web3.OfflineTransactionSigner.SignTransaction("9817CF212721DDAB1087FF642C7D52DCC1DDC0CBE1ABB92A085C12EE92365673", "0xF510450c7731B584E58635D361Fd33570dD92A98", new HexBigInteger(0), txCount.Value, new BigInteger(2), new BigInteger(26000), "0x" + hash);
+                var transactionHash = await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync("0x" + encoded);
+                tx = transactionHash;
+            }
+            catch (System.Exception e)
+            {
+                throw e;
+            }
+
+
+            var result = new SyncedData {
+                Id = "",
+                Year = year,
+                Week = week,
+                Employee = employee,
+                Tx = tx
+            };
+            BsonDocument newData = new BsonDocument();
+            newData.Add("year", result.Year);
+            newData.Add("week", result.Week);
+            newData.Add("employee", result.Employee);
+            newData.Add("tx", result.Tx);
+            MongoHelper.GetDatabase().GetCollection<BsonDocument>("synced_data").InsertOne(newData);
+            result.Id = newData.GetValue("_id").ToString();
+            return result;
         }
 
     }
