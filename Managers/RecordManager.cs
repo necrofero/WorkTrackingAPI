@@ -23,6 +23,10 @@ namespace WorkTrackingAPI.Managers
     public static class RecordManager
     {
 
+        private static string PROVIDER = "https://ropsten.infura.io/v3/7b9974f32d58401f917c63242e1dcb48";
+        private static string PRIVATE_KEY = "9817CF212721DDAB1087FF642C7D52DCC1DDC0CBE1ABB92A085C12EE92365673";
+        private static string WALLET = "0xF510450c7731B584E58635D361Fd33570dD92A98";
+
         public static List<WorkRecord> GetRecords(string start, string end, string employee)
         {
             var result = new List<WorkRecord>();
@@ -135,14 +139,14 @@ namespace WorkTrackingAPI.Managers
             }
 
             var tx = "";
-            var web3 = new Web3("https://ropsten.infura.io/v3/7b9974f32d58401f917c63242e1dcb48");
-            var account = new Account("9817CF212721DDAB1087FF642C7D52DCC1DDC0CBE1ABB92A085C12EE92365673");
+            var web3 = new Web3(PROVIDER);
+            var account = new Account(PRIVATE_KEY);
             try
             {
                 //var balance = await web3.Eth.GetBalance.SendRequestAsync("0xF510450c7731B584E58635D361Fd33570dD92A98");
                 //var etherAmount = Web3.Convert.FromWei(balance.Value);
-                var txCount = await web3.Eth.Transactions.GetTransactionCount.SendRequestAsync("0xF510450c7731B584E58635D361Fd33570dD92A98");
-                var encoded = Web3.OfflineTransactionSigner.SignTransaction("9817CF212721DDAB1087FF642C7D52DCC1DDC0CBE1ABB92A085C12EE92365673", "0xF510450c7731B584E58635D361Fd33570dD92A98", new HexBigInteger(0), txCount.Value, new BigInteger(2), new BigInteger(26000), "0x" + hash);
+                var txCount = await web3.Eth.Transactions.GetTransactionCount.SendRequestAsync(WALLET);
+                var encoded = Web3.OfflineTransactionSigner.SignTransaction(PRIVATE_KEY, WALLET, new HexBigInteger(0), txCount.Value, new BigInteger(2), new BigInteger(26000), "0x" + hash);
                 var transactionHash = await web3.Eth.Transactions.SendRawTransaction.SendRequestAsync("0x" + encoded);
                 tx = transactionHash;
             }
